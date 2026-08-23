@@ -4,6 +4,7 @@ import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.service.WalletService;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController //this receives and returns the HTTP requests
@@ -24,5 +25,10 @@ public class WalletController {
     @GetMapping("/{id}")
     public Wallet getWallet(@PathVariable UUID id) {
         return walletService.getWallet(id);
+    }
+
+    @GetMapping("/{id}/balance")
+    public BigDecimal getBalance(@PathVariable UUID id) {
+        return walletService.getBalance(id);
     }
 }

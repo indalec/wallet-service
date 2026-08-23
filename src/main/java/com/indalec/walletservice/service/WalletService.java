@@ -4,6 +4,7 @@ import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 //This class contains the business logic
@@ -25,4 +26,12 @@ public class WalletService {
         return walletRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
     }
+
+    public BigDecimal getBalance(UUID id) {
+        Wallet wallet = walletRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+        return wallet.getBalance();
+    }
+
 }
