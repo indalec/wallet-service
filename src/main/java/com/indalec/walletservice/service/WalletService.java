@@ -10,6 +10,7 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
 
+    //Dependency injection
     public WalletService(WalletRepository walletRepository) {
         this.walletRepository = walletRepository;
     }
