@@ -4,6 +4,8 @@ import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 //This class contains the business logic
 @Service
 public class WalletService {
@@ -17,5 +19,10 @@ public class WalletService {
 
     public Wallet createWallet(Wallet wallet) {
         return walletRepository.save(wallet);
+    }
+
+    public Wallet getWallet(UUID id) {
+        return walletRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
     }
 }
