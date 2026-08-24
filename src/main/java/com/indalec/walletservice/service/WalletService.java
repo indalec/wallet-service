@@ -1,5 +1,6 @@
 package com.indalec.walletservice.service;
 
+import com.indalec.walletservice.exception.WalletNotFoundException;
 import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.repository.WalletRepository;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,12 @@ public class WalletService {
 
     public Wallet getWallet(UUID id) {
         return walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
     }
 
     public BigDecimal getBalance(UUID id) {
         Wallet wallet = walletRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
         return wallet.getBalance();
     }

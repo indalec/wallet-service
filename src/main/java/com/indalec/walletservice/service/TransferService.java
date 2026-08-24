@@ -1,5 +1,6 @@
 package com.indalec.walletservice.service;
 
+import com.indalec.walletservice.exception.WalletNotFoundException;
 import com.indalec.walletservice.model.Transfer;
 import com.indalec.walletservice.model.TransferStatus;
 import com.indalec.walletservice.model.Wallet;
@@ -36,10 +37,10 @@ public class TransferService {
     ) {
 
         Wallet source = walletRepository.findById(sourceWalletId)
-                .orElseThrow(() -> new RuntimeException("Source wallet not found"));
+                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
         Wallet destination = walletRepository.findById(destinationWalletId)
-                .orElseThrow(() -> new RuntimeException("Destination wallet not found"));
+                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
         if (sourceWalletId.equals(destinationWalletId)) {
             throw new RuntimeException("A wallet cannot transfer money to itself");
