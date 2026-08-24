@@ -187,4 +187,88 @@ class TransferIntegrationTest {
                 updatedDestination.getBalance()
         );
     }
+
+    @Test
+    void shouldExecuteConcurrentRequestsWithSameIdempotencyKeyOnlyOnce()
+            throws InterruptedException {
+
+        Wallet source = walletRepository.save(
+                new Wallet("Alice", "EUR", new BigDecimal("100.00"))
+        );
+
+        Wallet destination = walletRepository.save(
+                new Wallet("Bob", "EUR", new BigDecimal("0.00"))
+        );
+
+        String idempotencyKey = "concurrent-same-key";
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Callable<Boolean> transferA = () -> {
+            try {
+                transferService.transfer(
+                        source.getId(),
+                        destination.getId(),
+                        new BigDecimal("25.00"),
+                        "EUR",
+                        idempotencyKey
+                );
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        };
+
+        Callable<Boolean> transferB = () -> {
+            try {
+                transferService.transfer(
+                        source.getId(),
+                        destination.getId(),
+                        new BigDecimal("25.00"),
+                        "EUR",
+                        idempotencyKey
+                );
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        };
+
+        List<Future<Boolean>> results = executor.invokeAll(
+                List.of(transferA, transferB)
+        );
+
+        executor.shutdown();
+
+        long successfulRequests = results.stream()
+                .filter(future -> {
+                    try {
+                        return future.get();
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .count();
+
+        Wallet finalSource =
+                walletRepository.findById(source.getId()).orElseThrow();
+
+        Wallet finalDestination =
+                walletRepository.findById(destination.getId()).orElseThrow();
+
+        assertEquals(
+                new BigDecimal("75.00"),
+                finalSource.getBalance()
+        );
+
+        assertEquals(
+                new BigDecimal("25.00"),
+                finalDestination.getBalance()
+        );
+
+        assertEquals(
+                2,
+                successfulRequests
+        );
+    }
 }
