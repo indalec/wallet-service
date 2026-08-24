@@ -38,6 +38,14 @@ public class TransferService {
             String idempotencyKey
     ) {
 
+        Transfer existingTransfer =
+                transferRepository.findByIdempotencyKey(idempotencyKey)
+                        .orElse(null);
+
+        if (existingTransfer != null) {
+            return existingTransfer;
+        }
+
         Wallet source = walletRepository.findById(sourceWalletId)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 

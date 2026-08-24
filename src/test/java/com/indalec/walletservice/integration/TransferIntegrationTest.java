@@ -141,4 +141,50 @@ class TransferIntegrationTest {
                 finalSource.getBalance().compareTo(BigDecimal.ZERO) >= 0
         );
     }
+
+    @Test
+    void shouldNotTransferMoneyTwiceWithSameIdempotencyKey() {
+
+        Wallet source = walletRepository.save(
+                new Wallet("Alice", "EUR", new BigDecimal("100.00"))
+        );
+
+        Wallet destination = walletRepository.save(
+                new Wallet("Bob", "EUR", new BigDecimal("50.00"))
+        );
+
+        String idempotencyKey = "same-transfer";
+
+        transferService.transfer(
+                source.getId(),
+                destination.getId(),
+                new BigDecimal("25.00"),
+                "EUR",
+                idempotencyKey
+        );
+
+        transferService.transfer(
+                source.getId(),
+                destination.getId(),
+                new BigDecimal("25.00"),
+                "EUR",
+                idempotencyKey
+        );
+
+        Wallet updatedSource =
+                walletRepository.findById(source.getId()).orElseThrow();
+
+        Wallet updatedDestination =
+                walletRepository.findById(destination.getId()).orElseThrow();
+
+        assertEquals(
+                new BigDecimal("75.00"),
+                updatedSource.getBalance()
+        );
+
+        assertEquals(
+                new BigDecimal("75.00"),
+                updatedDestination.getBalance()
+        );
+    }
 }
