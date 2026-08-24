@@ -1,6 +1,7 @@
 package com.indalec.walletservice.exception;
 
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,6 +45,17 @@ public class GlobalExceptionHandler {
 
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
+
+        return error;
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleOptimisticLockingFailure(
+            OptimisticLockingFailureException ex) {
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Wallet was modified concurrently. Please retry the transfer.");
 
         return error;
     }
