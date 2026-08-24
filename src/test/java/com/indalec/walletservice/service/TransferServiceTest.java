@@ -13,16 +13,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//it tells JUnit to use Mockito for the tests
 @ExtendWith(MockitoExtension.class)
 class TransferServiceTest {
 
-    //Creates a Mock version of the Object
     @Mock
     private WalletRepository walletRepository;
 
@@ -31,7 +30,6 @@ class TransferServiceTest {
 
     private TransferService transferService;
 
-    //Run this method before each test
     @BeforeEach
     void setUp() {
         transferService = new TransferService(
@@ -59,15 +57,15 @@ class TransferServiceTest {
         );
 
         when(walletRepository.findById(sourceId))
-                .thenReturn(java.util.Optional.of(source));
+                .thenReturn(Optional.of(source));
 
         when(walletRepository.findById(destinationId))
-                .thenReturn(java.util.Optional.of(destination));
+                .thenReturn(Optional.of(destination));
 
         when(transferRepository.save(any(Transfer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        transferService.transfer(
+        Transfer result = transferService.transfer(
                 sourceId,
                 destinationId,
                 new BigDecimal("25.00"),
@@ -82,6 +80,18 @@ class TransferServiceTest {
         assertEquals(
                 new BigDecimal("75.00"),
                 destination.getBalance()
+        );
+
+        assertNotNull(result);
+
+        assertEquals(
+                new BigDecimal("25.00"),
+                result.getAmount()
+        );
+
+        assertEquals(
+                "EUR",
+                result.getCurrency()
         );
 
         verify(transferRepository).save(any(Transfer.class));
@@ -106,10 +116,10 @@ class TransferServiceTest {
         );
 
         when(walletRepository.findById(sourceId))
-                .thenReturn(java.util.Optional.of(source));
+                .thenReturn(Optional.of(source));
 
         when(walletRepository.findById(destinationId))
-                .thenReturn(java.util.Optional.of(destination));
+                .thenReturn(Optional.of(destination));
 
         assertThrows(
                 TransferException.class,
@@ -120,6 +130,18 @@ class TransferServiceTest {
                         "EUR"
                 )
         );
+
+        assertEquals(
+                new BigDecimal("100.00"),
+                source.getBalance()
+        );
+
+        assertEquals(
+                new BigDecimal("50.00"),
+                destination.getBalance()
+        );
+
+        verify(transferRepository, never()).save(any());
     }
 
     @Test
@@ -141,10 +163,10 @@ class TransferServiceTest {
         );
 
         when(walletRepository.findById(sourceId))
-                .thenReturn(java.util.Optional.of(source));
+                .thenReturn(Optional.of(source));
 
         when(walletRepository.findById(destinationId))
-                .thenReturn(java.util.Optional.of(destination));
+                .thenReturn(Optional.of(destination));
 
         assertThrows(
                 TransferException.class,
@@ -167,7 +189,6 @@ class TransferServiceTest {
         );
 
         verify(transferRepository, never()).save(any());
-
     }
 
     @Test
@@ -189,10 +210,10 @@ class TransferServiceTest {
         );
 
         when(walletRepository.findById(sourceId))
-                .thenReturn(java.util.Optional.of(source));
+                .thenReturn(Optional.of(source));
 
         when(walletRepository.findById(destinationId))
-                .thenReturn(java.util.Optional.of(destination));
+                .thenReturn(Optional.of(destination));
 
         assertThrows(
                 TransferException.class,
@@ -214,6 +235,54 @@ class TransferServiceTest {
                 destination.getBalance()
         );
 
+        verify(transferRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectZeroAmount() {
+
+        UUID sourceId = UUID.randomUUID();
+        UUID destinationId = UUID.randomUUID();
+
+        Wallet source = new Wallet(
+                "Alice",
+                "EUR",
+                new BigDecimal("100.00")
+        );
+
+        Wallet destination = new Wallet(
+                "Bob",
+                "EUR",
+                new BigDecimal("50.00")
+        );
+
+        when(walletRepository.findById(sourceId))
+                .thenReturn(Optional.of(source));
+
+        when(walletRepository.findById(destinationId))
+                .thenReturn(Optional.of(destination));
+
+        assertThrows(
+                TransferException.class,
+                () -> transferService.transfer(
+                        sourceId,
+                        destinationId,
+                        BigDecimal.ZERO,
+                        "EUR"
+                )
+        );
+
+        assertEquals(
+                new BigDecimal("100.00"),
+                source.getBalance()
+        );
+
+        assertEquals(
+                new BigDecimal("50.00"),
+                destination.getBalance()
+        );
+
+        verify(transferRepository, never()).save(any());
     }
 
     @Test
@@ -228,7 +297,7 @@ class TransferServiceTest {
         );
 
         when(walletRepository.findById(walletId))
-                .thenReturn(java.util.Optional.of(wallet));
+                .thenReturn(Optional.of(wallet));
 
         assertThrows(
                 TransferException.class,
@@ -246,9 +315,6 @@ class TransferServiceTest {
         );
 
         verify(transferRepository, never()).save(any());
-
-
-
     }
 
     @Test
@@ -258,7 +324,7 @@ class TransferServiceTest {
         UUID destinationId = UUID.randomUUID();
 
         when(walletRepository.findById(sourceId))
-                .thenReturn(java.util.Optional.empty());
+                .thenReturn(Optional.empty());
 
         assertThrows(
                 WalletNotFoundException.class,
@@ -272,5 +338,108 @@ class TransferServiceTest {
 
         verify(transferRepository, never()).save(any());
     }
+
+    @Test
+    void shouldRejectWhenDestinationWalletDoesNotExist() {
+
+        UUID sourceId = UUID.randomUUID();
+        UUID destinationId = UUID.randomUUID();
+
+        Wallet source = new Wallet(
+                "Alice",
+                "EUR",
+                new BigDecimal("100.00")
+        );
+
+        when(walletRepository.findById(sourceId))
+                .thenReturn(Optional.of(source));
+
+        when(walletRepository.findById(destinationId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                WalletNotFoundException.class,
+                () -> transferService.transfer(
+                        sourceId,
+                        destinationId,
+                        new BigDecimal("25.00"),
+                        "EUR"
+                )
+        );
+
+        assertEquals(
+                new BigDecimal("100.00"),
+                source.getBalance()
+        );
+
+        verify(transferRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldCreateCompletedTransfer() {
+
+        UUID sourceId = UUID.randomUUID();
+        UUID destinationId = UUID.randomUUID();
+
+        Wallet source = new Wallet(
+                "Alice",
+                "EUR",
+                new BigDecimal("100.00")
+        );
+
+        Wallet destination = new Wallet(
+                "Bob",
+                "EUR",
+                new BigDecimal("50.00")
+        );
+
+        when(walletRepository.findById(sourceId))
+                .thenReturn(Optional.of(source));
+
+        when(walletRepository.findById(destinationId))
+                .thenReturn(Optional.of(destination));
+
+        when(transferRepository.save(any(Transfer.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Transfer result = transferService.transfer(
+                sourceId,
+                destinationId,
+                new BigDecimal("25.00"),
+                "EUR"
+        );
+
+        assertNotNull(result);
+
+        assertEquals(
+                new BigDecimal("25.00"),
+                result.getAmount()
+        );
+
+        assertEquals(
+                "EUR",
+                result.getCurrency()
+        );
+
+        assertEquals(
+                source,
+                result.getSourceWallet()
+        );
+
+        assertEquals(
+                destination,
+                result.getDestinationWallet()
+        );
+
+        assertEquals(
+                com.indalec.walletservice.model.TransferStatus.COMPLETED,
+                result.getStatus()
+        );
+
+        assertNotNull(result.getCreatedAt());
+
+        verify(transferRepository).save(any(Transfer.class));
+    }
+
 
 }
