@@ -56,10 +56,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         when(transferRepository.save(any(Transfer.class)))
@@ -116,10 +116,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         assertThrows(
@@ -164,10 +164,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         assertThrows(
@@ -212,10 +212,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         assertThrows(
@@ -260,10 +260,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         assertThrows(
@@ -301,7 +301,7 @@ class TransferServiceTest {
                 new BigDecimal("100.00")
         );
 
-        when(walletRepository.findById(walletId))
+        when(walletRepository.findByIdForUpdate(walletId))
                 .thenReturn(Optional.of(wallet));
 
         assertThrows(
@@ -329,7 +329,7 @@ class TransferServiceTest {
         UUID sourceId = UUID.randomUUID();
         UUID destinationId = UUID.randomUUID();
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.empty());
 
         assertThrows(
@@ -358,10 +358,10 @@ class TransferServiceTest {
                 new BigDecimal("100.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.empty());
 
         assertThrows(
@@ -401,10 +401,10 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findById(sourceId))
+        when(walletRepository.findByIdForUpdate(sourceId))
                 .thenReturn(Optional.of(source));
 
-        when(walletRepository.findById(destinationId))
+        when(walletRepository.findByIdForUpdate(destinationId))
                 .thenReturn(Optional.of(destination));
 
         when(transferRepository.save(any(Transfer.class)))

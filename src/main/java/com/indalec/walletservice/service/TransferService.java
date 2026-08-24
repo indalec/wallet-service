@@ -7,6 +7,7 @@ import com.indalec.walletservice.model.TransferStatus;
 import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.repository.TransferRepository;
 import com.indalec.walletservice.repository.WalletRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +28,7 @@ public class TransferService {
         this.walletRepository = walletRepository;
         this.transferRepository = transferRepository;
     }
-
-    //With Transactional the transfer will either complete entirely or have no effect at all.
-    @Transactional
+@Transactional
     public Transfer transfer(
             UUID sourceWalletId,
             UUID destinationWalletId,
@@ -38,6 +37,7 @@ public class TransferService {
             String idempotencyKey
     ) {
 
+        // First check: if this request was already processed, return the existing transfer.
         Transfer existingTransfer =
                 transferRepository.findByIdempotencyKey(idempotencyKey)
                         .orElse(null);
@@ -46,10 +46,37 @@ public class TransferService {
             return existingTransfer;
         }
 
-        Wallet source = walletRepository.findById(sourceWalletId)
+        try {
+            return executeTransfer(
+                    sourceWalletId,
+                    destinationWalletId,
+                    amount,
+                    currency,
+                    idempotencyKey
+            );
+        } catch (DataIntegrityViolationException e) {
+
+            // Another concurrent request may have created the transfer
+            // with the same idempotency key.
+            return transferRepository.findByIdempotencyKey(idempotencyKey)
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    // With Transactional the transfer will either complete entirely or have no effect at all.
+    @Transactional
+    public Transfer executeTransfer(
+            UUID sourceWalletId,
+            UUID destinationWalletId,
+            BigDecimal amount,
+            String currency,
+            String idempotencyKey
+    ) {
+
+        Wallet source = walletRepository.findByIdForUpdate(sourceWalletId)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
-        Wallet destination = walletRepository.findById(destinationWalletId)
+        Wallet destination = walletRepository.findByIdForUpdate(destinationWalletId)
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
         if (sourceWalletId.equals(destinationWalletId)) {
