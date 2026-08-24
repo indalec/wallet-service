@@ -1,18 +1,13 @@
 package com.indalec.walletservice.service;
 
 import com.indalec.walletservice.exception.TransferException;
-import com.indalec.walletservice.exception.WalletNotFoundException;
 import com.indalec.walletservice.model.Transfer;
-import com.indalec.walletservice.model.TransferStatus;
-import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.repository.TransferRepository;
 import com.indalec.walletservice.repository.WalletRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -20,15 +15,18 @@ public class TransferService {
 
     private final WalletRepository walletRepository;
     private final TransferRepository transferRepository;
+    private final TransferTransactionService transferTransactionService;
 
     public TransferService(
             WalletRepository walletRepository,
-            TransferRepository transferRepository
+            TransferRepository transferRepository,
+            TransferTransactionService transferTransactionService
     ) {
         this.walletRepository = walletRepository;
         this.transferRepository = transferRepository;
+        this.transferTransactionService = transferTransactionService;
     }
-@Transactional
+
     public Transfer transfer(
             UUID sourceWalletId,
             UUID destinationWalletId,
@@ -47,7 +45,7 @@ public class TransferService {
         }
 
         try {
-            return executeTransfer(
+            return transferTransactionService.executeTransfer(
                     sourceWalletId,
                     destinationWalletId,
                     amount,
@@ -58,57 +56,13 @@ public class TransferService {
 
             // Another concurrent request may have created the transfer
             // with the same idempotency key.
-            return transferRepository.findByIdempotencyKey(idempotencyKey)
-                    .orElseThrow(() -> e);
+            return findExistingTransfer(idempotencyKey);
         }
     }
 
-    // With Transactional the transfer will either complete entirely or have no effect at all.
-    @Transactional
-    public Transfer executeTransfer(
-            UUID sourceWalletId,
-            UUID destinationWalletId,
-            BigDecimal amount,
-            String currency,
-            String idempotencyKey
-    ) {
-
-        Wallet source = walletRepository.findByIdForUpdate(sourceWalletId)
-                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
-
-        Wallet destination = walletRepository.findByIdForUpdate(destinationWalletId)
-                .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
-
-        if (sourceWalletId.equals(destinationWalletId)) {
-            throw new TransferException("A wallet cannot transfer money to itself");
-        }
-
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransferException("Transfer amount must be greater than zero");
-        }
-
-        if (!source.getCurrency().equals(currency)
-                || !destination.getCurrency().equals(currency)) {
-            throw new TransferException("Currency mismatch");
-        }
-
-        if (source.getBalance().compareTo(amount) < 0) {
-            throw new TransferException("Insufficient funds");
-        }
-
-        source.setBalance(source.getBalance().subtract(amount));
-        destination.setBalance(destination.getBalance().add(amount));
-
-        Transfer transfer = new Transfer(
-                source,
-                destination,
-                amount,
-                currency,
-                LocalDateTime.now(),
-                TransferStatus.COMPLETED,
-                idempotencyKey
-        );
-
-        return transferRepository.save(transfer);
+    public Transfer findExistingTransfer(String idempotencyKey) {
+        return transferRepository.findByIdempotencyKey(idempotencyKey)
+                .orElseThrow(() ->
+                        new TransferException("Transfer not found after concurrent request"));
     }
 }

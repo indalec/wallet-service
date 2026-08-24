@@ -28,11 +28,11 @@ class TransferServiceTest {
     @Mock
     private TransferRepository transferRepository;
 
-    private TransferService transferService;
+    private TransferTransactionService transferTransactionService;
 
     @BeforeEach
     void setUp() {
-        transferService = new TransferService(
+        transferTransactionService = new TransferTransactionService(
                 walletRepository,
                 transferRepository
         );
@@ -65,7 +65,7 @@ class TransferServiceTest {
         when(transferRepository.save(any(Transfer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Transfer result = transferService.transfer(
+        Transfer result = transferTransactionService.executeTransfer(
                 sourceId,
                 destinationId,
                 new BigDecimal("25.00"),
@@ -124,7 +124,7 @@ class TransferServiceTest {
 
         assertThrows(
                 TransferException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         new BigDecimal("150.00"),
@@ -172,7 +172,7 @@ class TransferServiceTest {
 
         assertThrows(
                 TransferException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
@@ -220,7 +220,7 @@ class TransferServiceTest {
 
         assertThrows(
                 TransferException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         new BigDecimal("-10.00"),
@@ -268,7 +268,7 @@ class TransferServiceTest {
 
         assertThrows(
                 TransferException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         BigDecimal.ZERO,
@@ -306,7 +306,7 @@ class TransferServiceTest {
 
         assertThrows(
                 TransferException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         walletId,
                         walletId,
                         new BigDecimal("25.00"),
@@ -334,7 +334,7 @@ class TransferServiceTest {
 
         assertThrows(
                 WalletNotFoundException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
@@ -366,7 +366,7 @@ class TransferServiceTest {
 
         assertThrows(
                 WalletNotFoundException.class,
-                () -> transferService.transfer(
+                () -> transferTransactionService.executeTransfer(
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
@@ -410,7 +410,7 @@ class TransferServiceTest {
         when(transferRepository.save(any(Transfer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        Transfer result = transferService.transfer(
+        Transfer result = transferTransactionService.executeTransfer(
                 sourceId,
                 destinationId,
                 new BigDecimal("25.00"),
@@ -449,6 +449,4 @@ class TransferServiceTest {
 
         verify(transferRepository).save(any(Transfer.class));
     }
-
-
 }
