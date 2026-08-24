@@ -6,13 +6,15 @@ import com.indalec.walletservice.service.TransferService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//to run the whole SpringBoot aplication, not an isolated test (can modify database)
+//to run the whole SpringBoot aplication, not an isolated test (can modify database). ActiveProfiles to use de application-test.propierties
 @SpringBootTest
+@ActiveProfiles("test")
 class TransferIntegrationTest {
 
     @Autowired
