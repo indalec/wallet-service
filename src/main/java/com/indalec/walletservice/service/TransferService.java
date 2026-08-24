@@ -1,5 +1,6 @@
 package com.indalec.walletservice.service;
 
+import com.indalec.walletservice.exception.TransferException;
 import com.indalec.walletservice.exception.WalletNotFoundException;
 import com.indalec.walletservice.model.Transfer;
 import com.indalec.walletservice.model.TransferStatus;
@@ -43,20 +44,20 @@ public class TransferService {
                 .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
 
         if (sourceWalletId.equals(destinationWalletId)) {
-            throw new RuntimeException("A wallet cannot transfer money to itself");
+            throw new TransferException("A wallet cannot transfer money to itself");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Transfer amount must be greater than zero");
+            throw new TransferException("Transfer amount must be greater than zero");
         }
 
         if (!source.getCurrency().equals(currency)
                 || !destination.getCurrency().equals(currency)) {
-            throw new RuntimeException("Currency mismatch");
+            throw new TransferException("Currency mismatch");
         }
 
         if (source.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds");
+            throw new TransferException("Insufficient funds");
         }
 
         source.setBalance(source.getBalance().subtract(amount));

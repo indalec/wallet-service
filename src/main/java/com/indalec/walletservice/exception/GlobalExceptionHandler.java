@@ -38,4 +38,14 @@ public class GlobalExceptionHandler {
         return error;
     }
 
+    @ExceptionHandler(TransferException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleTransferException(TransferException ex) {
+
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+
+        return error;
+    }
+
 }
