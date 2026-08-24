@@ -56,6 +56,7 @@ public class Transfer {
         this.currency = currency;
         this.createdAt = createdAt;
         this.status = status;
+        this.idempotencyKey = idempotencyKey;
     }
 
     public UUID getId() {
