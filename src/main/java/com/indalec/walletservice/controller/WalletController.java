@@ -2,6 +2,7 @@ package com.indalec.walletservice.controller;
 
 import com.indalec.walletservice.model.Wallet;
 import com.indalec.walletservice.service.WalletService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ public class WalletController {
     }
 
     @PostMapping
-    public Wallet createWallet(@RequestBody Wallet wallet) {
+    public Wallet createWallet(@Valid @RequestBody Wallet wallet) {
         return  walletService.createWallet(wallet);
     }
 

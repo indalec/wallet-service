@@ -5,6 +5,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -17,12 +22,19 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id; //UUID generates a unique identifier, better in distributed systems,  instead of the simple sequence of a Long
 
+
+    @NotBlank
+    @Size(max = 100)
     private String ownerName;
 
+    @NotBlank
+    @Size(min = 3, max = 3)
     private String currency;
 
 
     //We will use BigDecimal instead of Double to solve precision issues
+    @NotNull
+    @PositiveOrZero
     private BigDecimal balance;
 
 
