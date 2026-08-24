@@ -47,7 +47,8 @@ class TransferIntegrationTest {
                 source.getId(),
                 destination.getId(),
                 new BigDecimal("25.00"),
-                "EUR"
+                "EUR",
+                "test-idempotency-key"
         );
 
         Wallet updatedSource =
@@ -91,7 +92,8 @@ class TransferIntegrationTest {
                         source.getId(),
                         destinationA.getId(),
                         new BigDecimal("80.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 );
                 return true;
             } catch (Exception e) {
@@ -105,7 +107,8 @@ class TransferIntegrationTest {
                         source.getId(),
                         destinationB.getId(),
                         new BigDecimal("70.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 );
                 return true;
             } catch (Exception e) {

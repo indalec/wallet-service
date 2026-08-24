@@ -34,7 +34,8 @@ public class TransferService {
             UUID sourceWalletId,
             UUID destinationWalletId,
             BigDecimal amount,
-            String currency
+            String currency,
+            String idempotencyKey
     ) {
 
         Wallet source = walletRepository.findById(sourceWalletId)
@@ -69,7 +70,8 @@ public class TransferService {
                 amount,
                 currency,
                 LocalDateTime.now(),
-                TransferStatus.COMPLETED
+                TransferStatus.COMPLETED,
+                idempotencyKey
         );
 
         return transferRepository.save(transfer);

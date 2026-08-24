@@ -19,6 +19,9 @@ public record CreateTransferRequest(
         BigDecimal amount,
 
         @NotNull
-        String currency
+        String currency,
+
+        @NotNull
+        String idempotencyKey
 ) {
 }

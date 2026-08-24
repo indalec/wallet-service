@@ -69,7 +69,8 @@ class TransferServiceTest {
                 sourceId,
                 destinationId,
                 new BigDecimal("25.00"),
-                "EUR"
+                "EUR",
+                "test-idempotency-key"
         );
 
         assertEquals(
@@ -127,7 +128,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         new BigDecimal("150.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -174,7 +176,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -221,7 +224,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         new BigDecimal("-10.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -268,7 +272,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         BigDecimal.ZERO,
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -305,7 +310,8 @@ class TransferServiceTest {
                         walletId,
                         walletId,
                         new BigDecimal("25.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -332,7 +338,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -363,7 +370,8 @@ class TransferServiceTest {
                         sourceId,
                         destinationId,
                         new BigDecimal("25.00"),
-                        "EUR"
+                        "EUR",
+                        "test-idempotency-key"
                 )
         );
 
@@ -406,7 +414,8 @@ class TransferServiceTest {
                 sourceId,
                 destinationId,
                 new BigDecimal("25.00"),
-                "EUR"
+                "EUR",
+                "test-idempotency-key"
         );
 
         assertNotNull(result);

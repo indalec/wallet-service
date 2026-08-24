@@ -28,7 +28,8 @@ public class TransferController {
                 request.sourceWalletId(),
                 request.destinationWalletId(),
                 request.amount(),
-                request.currency()
+                request.currency(),
+                request.idempotencyKey()
         );
     }
 }

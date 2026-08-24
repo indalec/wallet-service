@@ -34,6 +34,9 @@ public class Transfer {
     @Column(nullable = false)
     private TransferStatus status;
 
+    @Column(nullable = false, unique = true)
+    private String idempotencyKey;
+
     protected Transfer() {
     }
 
@@ -43,7 +46,9 @@ public class Transfer {
             BigDecimal amount,
             String currency,
             LocalDateTime createdAt,
-            TransferStatus status
+            TransferStatus status,
+            String idempotencyKey
+
     ) {
         this.sourceWallet = sourceWallet;
         this.destinationWallet = destinationWallet;
