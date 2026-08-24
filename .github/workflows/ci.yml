@@ -19,7 +19,7 @@ jobs:
         image: mysql:8.4
         env:
           MYSQL_ROOT_PASSWORD: admin
-          MYSQL_DATABASE: wallet_service_test
+          MYSQL_DATABASE: wallet_service
         ports:
           - 3306:3306
         options: >-
@@ -38,6 +38,10 @@ jobs:
           distribution: temurin
           java-version: '23'
           cache: maven
+
+      - name: Create test database
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -padmin -e "CREATE DATABASE IF NOT EXISTS wallet_service_test;"
 
       - name: Run tests
         run: ./mvnw test
