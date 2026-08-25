@@ -29,7 +29,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"
-      
+
   prometheus:
     image: prom/prometheus
     container_name: wallet-service-prometheus
@@ -40,5 +40,16 @@ services:
     depends_on:
       - wallet-service
 
+  grafana:
+    image: grafana/grafana
+    container_name: wallet-service-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
   mysql_data:
+  grafana_data:
