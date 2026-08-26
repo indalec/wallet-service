@@ -173,7 +173,7 @@ This is the easiest way to run the entire stack (application + MySQL + Prometheu
    docker compose up -d
    ```
 
-  > **Note:** If your system only has the legacy `docker-compose` (v1), you can use `docker-compose up -d` instead. However, if you have previously run this service on the same machine, you may encounter a `KeyError: 'ContainerConfig'`. To avoid it, first run `docker compose down -v` (or `docker-compose down -v`) to clean up old containers, then start again.
+> **Note:** If your system only has the legacy `docker-compose` (v1), you can use `docker-compose up -d` instead. However, if you have previously run this service on the same machine, you may encounter a `KeyError: 'ContainerConfig'`. To avoid it, first run `docker compose down -v` (or `docker-compose down -v`) to clean up old containers. If issues persist, run `docker system prune -f` to remove unused containers, networks, and images, then start again.
    
 
    This command starts:
