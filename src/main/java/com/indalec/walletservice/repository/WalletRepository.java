@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 import java.util.UUID;
 
-//Repository will give us the Java methods that subtitute the queries, in that case to work with Wallet Object that the type UUID
+//Repository will give us the Java methods that subtitute the queries, in that case to work with Wallet
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
