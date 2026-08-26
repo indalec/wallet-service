@@ -347,12 +347,13 @@ The application is instrumented for production observability:
 
 ### Metrics Pipeline
 
-Wallet Service (/actuator/prometheus)
-↓
-Prometheus (scrapes every 5s)
-↓
-Grafana (visualization)
+### Metrics Pipeline
 
+    Wallet Service (/actuator/prometheus)
+            ↓
+      Prometheus (scrapes every 5s)
+            ↓
+        Grafana (visualization)
 
 
 - **Prometheus** is configured to scrape metrics from the service every 5 seconds.
