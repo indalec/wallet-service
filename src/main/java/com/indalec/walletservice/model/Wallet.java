@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 
-@Entity //This represents a table of the database
+@Entity
 public class Wallet {
 
     @Id

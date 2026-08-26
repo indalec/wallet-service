@@ -246,7 +246,7 @@ POST /wallets
 }
 ```
 
-**Response:** `201 Created` with the created wallet object (including generated UUID).
+**Response:** `200 Created` with the created wallet object (including generated UUID).
 
 #### Get Wallet by ID
 

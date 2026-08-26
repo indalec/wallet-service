@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-//This class contains the business logic
+
 @Service
 public class WalletService {
 
     private final WalletRepository walletRepository;
 
-    //Dependency injection
+
     public WalletService(WalletRepository walletRepository) {
         this.walletRepository = walletRepository;
     }
