@@ -146,6 +146,8 @@ Before you begin, ensure you have the following installed:
 
 - **Java 23** (or later)
 - **Docker** and **Docker Compose** (recommended)
+  - *Newer installations (Docker Engine 20.10+) include the `docker compose` plugin – use that.*  
+  - If you only have the legacy `docker-compose` (v1), please upgrade to v2 or use the command `docker compose` instead (see [installation guide](https://docs.docker.com/compose/install/)).
   - *On Windows*: Docker Desktop requires **WSL2** to be installed and enabled. The project has been tested on Windows with the WSL2 backend.
 - **Git** (to clone the repository)
 - **Maven** (only if running without Docker)
@@ -168,9 +170,10 @@ This is the easiest way to run the entire stack (application + MySQL + Prometheu
 2. **Start all services:**
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
+  > **Note:** If your system only has the legacy `docker-compose` (v1), you can use `docker-compose up -d` instead. However, if you have previously run this service on the same machine, you may encounter a `KeyError: 'ContainerConfig'`. To avoid it, first run `docker compose down -v` (or `docker-compose down -v`) to clean up old containers, then start again.
    
 
    This command starts:
@@ -347,13 +350,12 @@ The application is instrumented for production observability:
 
 ### Metrics Pipeline
 
-### Metrics Pipeline
+Wallet Service (/actuator/prometheus)
+↓
+Prometheus (scrapes every 5s)
+↓
+Grafana (visualization)
 
-    Wallet Service (/actuator/prometheus)
-            ↓
-      Prometheus (scrapes every 5s)
-            ↓
-        Grafana (visualization)
 
 
 - **Prometheus** is configured to scrape metrics from the service every 5 seconds.
@@ -450,8 +452,9 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## Author
 
 Indalecio Valenzuela
-
 - GitHub: [indalec](https://github.com/indalec)  
 - LinkedIn: [Indaleci](https://www.linkedin.com/in/daleci/)
 
 ---
+
+*Built with ☕ and Spring Boot.*
