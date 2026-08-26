@@ -40,7 +40,7 @@ A production-ready REST API for managing digital wallets and money transfers bet
 
 The service is designed with production-grade concerns in mind: **consistency**, **reliability**, **observability**, and **easy operation** via Docker Compose.
 
-This project was developed as a learning exercise to explore Spring Boot, JPA, Docker, and monitoring stacks in a realistic backend scenario.
+This project was developed as a learning exercise to explore Spring Boot, JPA, Docker, and monitoring stacks in a realistic backend scenario. (See "Wallet Service Technical Challenge.pdf" for more information about the challenge)
 
 ---
 
