@@ -38,6 +38,39 @@ class TransferServiceTest {
         );
     }
 
+    /**
+     * The service locks wallets in UUID order to avoid deadlocks.
+     * Therefore tests must mock the repository using the same order.
+     */
+    private void mockWallets(
+            UUID sourceId,
+            UUID destinationId,
+            Wallet source,
+            Wallet destination
+    ) {
+        UUID firstId = sourceId.compareTo(destinationId) < 0
+                ? sourceId
+                : destinationId;
+
+        UUID secondId = sourceId.compareTo(destinationId) < 0
+                ? destinationId
+                : sourceId;
+
+        when(walletRepository.findByIdForUpdate(firstId))
+                .thenReturn(Optional.of(
+                        firstId.equals(sourceId)
+                                ? source
+                                : destination
+                ));
+
+        when(walletRepository.findByIdForUpdate(secondId))
+                .thenReturn(Optional.of(
+                        secondId.equals(sourceId)
+                                ? source
+                                : destination
+                ));
+    }
+
     @Test
     void shouldTransferMoneySuccessfully() {
 
@@ -56,11 +89,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         when(transferRepository.save(any(Transfer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -70,7 +104,8 @@ class TransferServiceTest {
                 destinationId,
                 new BigDecimal("25.00"),
                 "EUR",
-                "test-idempotency-key"
+                "test-idempotency-key",
+                "test-request-hash"
         );
 
         assertEquals(
@@ -116,11 +151,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         assertThrows(
                 TransferException.class,
@@ -129,7 +165,8 @@ class TransferServiceTest {
                         destinationId,
                         new BigDecimal("150.00"),
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -164,11 +201,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         assertThrows(
                 TransferException.class,
@@ -177,7 +215,8 @@ class TransferServiceTest {
                         destinationId,
                         new BigDecimal("25.00"),
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -212,11 +251,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         assertThrows(
                 TransferException.class,
@@ -225,7 +265,8 @@ class TransferServiceTest {
                         destinationId,
                         new BigDecimal("-10.00"),
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -260,11 +301,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         assertThrows(
                 TransferException.class,
@@ -273,7 +315,8 @@ class TransferServiceTest {
                         destinationId,
                         BigDecimal.ZERO,
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -301,7 +344,6 @@ class TransferServiceTest {
                 new BigDecimal("100.00")
         );
 
-
         assertThrows(
                 TransferException.class,
                 () -> transferTransactionService.executeTransfer(
@@ -309,7 +351,8 @@ class TransferServiceTest {
                         walletId,
                         new BigDecimal("25.00"),
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -362,7 +405,8 @@ class TransferServiceTest {
                         destinationId,
                         new BigDecimal("25.00"),
                         "EUR",
-                        "test-idempotency-key"
+                        "test-idempotency-key",
+                        "test-request-hash"
                 )
         );
 
@@ -387,11 +431,12 @@ class TransferServiceTest {
                 new BigDecimal("50.00")
         );
 
-        when(walletRepository.findByIdForUpdate(sourceId))
-                .thenReturn(Optional.of(source));
-
-        when(walletRepository.findByIdForUpdate(destinationId))
-                .thenReturn(Optional.of(destination));
+        mockWallets(
+                sourceId,
+                destinationId,
+                source,
+                destination
+        );
 
         when(transferRepository.save(any(Transfer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -401,7 +446,8 @@ class TransferServiceTest {
                 destinationId,
                 new BigDecimal("25.00"),
                 "EUR",
-                "test-idempotency-key"
+                "test-idempotency-key",
+                "test-request-hash"
         );
 
         assertNotNull(result);

@@ -40,7 +40,8 @@ public class TransferTransactionService {
             UUID destinationWalletId,
             BigDecimal amount,
             String currency,
-            String idempotencyKey
+            String idempotencyKey,
+            String requestHash
     ) {
 
         if (sourceWalletId.equals(destinationWalletId)) {
@@ -114,7 +115,8 @@ public class TransferTransactionService {
                 currency,
                 LocalDateTime.now(),
                 TransferStatus.COMPLETED,
-                idempotencyKey
+                idempotencyKey,
+                requestHash
         );
 
         return transferRepository.save(transfer);

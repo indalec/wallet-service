@@ -37,6 +37,9 @@ public class Transfer {
     @Column(nullable = false, unique = true)
     private String idempotencyKey;
 
+    @Column(nullable = false)
+    private String requestHash;
+
     protected Transfer() {
     }
 
@@ -47,8 +50,8 @@ public class Transfer {
             String currency,
             LocalDateTime createdAt,
             TransferStatus status,
-            String idempotencyKey
-
+            String idempotencyKey,
+            String requestHash
     ) {
         this.sourceWallet = sourceWallet;
         this.destinationWallet = destinationWallet;
@@ -57,6 +60,7 @@ public class Transfer {
         this.createdAt = createdAt;
         this.status = status;
         this.idempotencyKey = idempotencyKey;
+        this.requestHash = requestHash;
     }
 
     public UUID getId() {
@@ -85,5 +89,9 @@ public class Transfer {
 
     public TransferStatus getStatus() {
         return status;
+    }
+
+    public String getRequestHash() {
+        return requestHash;
     }
 }

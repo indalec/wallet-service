@@ -10,6 +10,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @Service
@@ -48,12 +51,31 @@ public class TransferService {
                 currency
         );
 
-        // First check: if this request was already processed, return the existing transfer.
+        String requestHash = generateRequestHash(
+                sourceWalletId,
+                destinationWalletId,
+                amount,
+                currency
+        );
+
+        // First check: if this request was already processed, validate
+        // that the idempotency key is being reused for the same operation.
         Transfer existingTransfer =
                 transferRepository.findByIdempotencyKey(idempotencyKey)
                         .orElse(null);
 
         if (existingTransfer != null) {
+
+            if (!existingTransfer.getRequestHash().equals(requestHash)) {
+                logger.warn(
+                        "Idempotency key reused for a different transfer: idempotencyKey={}",
+                        idempotencyKey
+                );
+
+                throw new TransferException(
+                        "Idempotency key already used for a different transfer"
+                );
+            }
 
             logger.info(
                     "Duplicate transfer request detected: idempotencyKey={}, transferId={}",
@@ -71,7 +93,8 @@ public class TransferService {
                     destinationWalletId,
                     amount,
                     currency,
-                    idempotencyKey
+                    idempotencyKey,
+                    requestHash
             );
 
             logger.info(
@@ -90,13 +113,58 @@ public class TransferService {
                     idempotencyKey
             );
 
-            return findExistingTransfer(idempotencyKey);
+            Transfer concurrentTransfer = findExistingTransfer(idempotencyKey);
+
+            if (!concurrentTransfer.getRequestHash().equals(requestHash)) {
+                throw new TransferException(
+                        "Idempotency key already used for a different transfer"
+                );
+            }
+
+            return concurrentTransfer;
         }
     }
 
     public Transfer findExistingTransfer(String idempotencyKey) {
         return transferRepository.findByIdempotencyKey(idempotencyKey)
                 .orElseThrow(() ->
-                        new TransferException("Transfer not found after concurrent request"));
+                        new TransferException(
+                                "Transfer not found after concurrent request"
+                        ));
+    }
+
+    private String generateRequestHash(
+            UUID sourceWalletId,
+            UUID destinationWalletId,
+            BigDecimal amount,
+            String currency
+    ) {
+        try {
+            String input =
+                    sourceWalletId + "|" +
+                            destinationWalletId + "|" +
+                            amount.toPlainString() + "|" +
+                            currency;
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            byte[] hash = digest.digest(
+                    input.getBytes(StandardCharsets.UTF_8)
+            );
+
+            StringBuilder result = new StringBuilder();
+
+            for (byte b : hash) {
+                result.append(String.format("%02x", b));
+            }
+
+            return result.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(
+                    "SHA-256 algorithm not available",
+                    e
+            );
+        }
     }
 }
