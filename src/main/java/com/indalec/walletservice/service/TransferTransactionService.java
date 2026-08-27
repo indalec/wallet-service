@@ -44,12 +44,25 @@ public class TransferTransactionService {
             String requestHash
     ) {
 
+        // Validations that do not require database access
         if (sourceWalletId.equals(destinationWalletId)) {
-            log.warn("Transfer failed: source and destination wallets are the same. walletId={}",
-                    sourceWalletId);
+            log.warn(
+                    "Transfer failed: source and destination wallets are the same. walletId={}",
+                    sourceWalletId
+            );
             throw new TransferException("A wallet cannot transfer money to itself");
         }
 
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.warn(
+                    "Transfer failed: amount must be greater than zero. sourceWalletId={}, destinationWalletId={}",
+                    sourceWalletId,
+                    destinationWalletId
+            );
+            throw new TransferException("Transfer amount must be greater than zero");
+        }
+
+        // Always acquire locks in deterministic order to prevent deadlocks
         UUID firstId = sourceWalletId.compareTo(destinationWalletId) < 0
                 ? sourceWalletId
                 : destinationWalletId;
@@ -60,13 +73,19 @@ public class TransferTransactionService {
 
         Wallet firstWallet = walletRepository.findByIdForUpdate(firstId)
                 .orElseThrow(() -> {
-                    log.warn("Transfer failed: wallet not found. walletId={}", firstId);
+                    log.warn(
+                            "Transfer failed: wallet not found. walletId={}",
+                            firstId
+                    );
                     return new WalletNotFoundException("Wallet not found");
                 });
 
         Wallet secondWallet = walletRepository.findByIdForUpdate(secondId)
                 .orElseThrow(() -> {
-                    log.warn("Transfer failed: wallet not found. walletId={}", secondId);
+                    log.warn(
+                            "Transfer failed: wallet not found. walletId={}",
+                            secondId
+                    );
                     return new WalletNotFoundException("Wallet not found");
                 });
 
@@ -78,35 +97,39 @@ public class TransferTransactionService {
                 ? firstWallet
                 : secondWallet;
 
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            log.warn("Transfer failed: amount must be greater than zero. sourceWalletId={}, destinationWalletId={}",
-                    sourceWalletId, destinationWalletId);
-            throw new TransferException("Transfer amount must be greater than zero");
-        }
-
+        // Validations that depend on the current wallet state
         if (!source.getCurrency().equals(currency)
                 || !destination.getCurrency().equals(currency)) {
+
             log.warn(
                     "Transfer failed: currency mismatch. sourceWalletId={}, destinationWalletId={}, currency={}",
                     sourceWalletId,
                     destinationWalletId,
                     currency
             );
+
             throw new TransferException("Currency mismatch");
         }
 
         if (source.getBalance().compareTo(amount) < 0) {
+
             log.warn(
                     "Transfer failed: insufficient funds. sourceWalletId={}, destinationWalletId={}, amount={}",
                     sourceWalletId,
                     destinationWalletId,
                     amount
             );
+
             throw new TransferException("Insufficient funds");
         }
 
-        source.setBalance(source.getBalance().subtract(amount));
-        destination.setBalance(destination.getBalance().add(amount));
+        source.setBalance(
+                source.getBalance().subtract(amount)
+        );
+
+        destination.setBalance(
+                destination.getBalance().add(amount)
+        );
 
         Transfer transfer = new Transfer(
                 source,

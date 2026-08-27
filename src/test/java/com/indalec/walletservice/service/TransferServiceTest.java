@@ -239,25 +239,6 @@ class TransferServiceTest {
         UUID sourceId = UUID.randomUUID();
         UUID destinationId = UUID.randomUUID();
 
-        Wallet source = new Wallet(
-                "Alice",
-                "EUR",
-                new BigDecimal("100.00")
-        );
-
-        Wallet destination = new Wallet(
-                "Bob",
-                "EUR",
-                new BigDecimal("50.00")
-        );
-
-        mockWallets(
-                sourceId,
-                destinationId,
-                source,
-                destination
-        );
-
         assertThrows(
                 TransferException.class,
                 () -> transferTransactionService.executeTransfer(
@@ -270,15 +251,7 @@ class TransferServiceTest {
                 )
         );
 
-        assertEquals(
-                new BigDecimal("100.00"),
-                source.getBalance()
-        );
-
-        assertEquals(
-                new BigDecimal("50.00"),
-                destination.getBalance()
-        );
+        verify(walletRepository, never()).findByIdForUpdate(any());
 
         verify(transferRepository, never()).save(any());
     }
@@ -288,25 +261,6 @@ class TransferServiceTest {
 
         UUID sourceId = UUID.randomUUID();
         UUID destinationId = UUID.randomUUID();
-
-        Wallet source = new Wallet(
-                "Alice",
-                "EUR",
-                new BigDecimal("100.00")
-        );
-
-        Wallet destination = new Wallet(
-                "Bob",
-                "EUR",
-                new BigDecimal("50.00")
-        );
-
-        mockWallets(
-                sourceId,
-                destinationId,
-                source,
-                destination
-        );
 
         assertThrows(
                 TransferException.class,
@@ -320,15 +274,7 @@ class TransferServiceTest {
                 )
         );
 
-        assertEquals(
-                new BigDecimal("100.00"),
-                source.getBalance()
-        );
-
-        assertEquals(
-                new BigDecimal("50.00"),
-                destination.getBalance()
-        );
+        verify(walletRepository, never()).findByIdForUpdate(any());
 
         verify(transferRepository, never()).save(any());
     }
