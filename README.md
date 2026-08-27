@@ -1,6 +1,6 @@
 # Wallet Service
 
-A production-ready REST API for managing digital wallets and money transfers between them, built with Spring Boot.
+A production-oriented REST API for managing digital wallets and money transfers between them, built with Spring Boot.
 
 [![CI](https://github.com/indalec/wallet-service/actions/workflows/ci.yml/badge.svg)](https://github.com/indalec/wallet-service/actions/workflows/ci.yml)
 ![Java](https://img.shields.io/badge/Java-23-blue)
@@ -38,7 +38,7 @@ A production-ready REST API for managing digital wallets and money transfers bet
 - **Wallet management** — create wallets, retrieve wallet details, and check balances.
 - **Money transfers** — move funds between wallets with full atomicity, idempotency, and concurrency control.
 
-The service is designed with production-grade concerns in mind: **consistency**, **reliability**, **observability**, and **easy operation** via Docker Compose.
+The service is designed with real-world backend concerns in mind: **consistency**, **reliability**, **observability**, and **easy operation** via Docker Compose.
 
 This project was developed as a learning exercise to explore Spring Boot, JPA, Docker, and monitoring stacks in a realistic backend scenario. (See "Wallet Service Technical Challenge.pdf" for more information about the challenge)
 
@@ -62,14 +62,15 @@ This project was developed as a learning exercise to explore Spring Boot, JPA, D
 - ✅ Idempotency via `idempotencyKey` to prevent duplicate processing
 - ✅ Concurrency control with pessimistic locking (`SELECT ... FOR UPDATE`)
 
-### Production Ready
+### Engineering & Operational Features
 
 - ✅ OpenAPI / Swagger UI documentation
-- ✅ Health and readiness probes (Spring Boot Actuator)
+- ✅ Health endpoint and application monitoring with Spring Boot Actuator
 - ✅ Prometheus metrics endpoint (`/actuator/prometheus`)
-- ✅ Structured logging for audits and debugging
-- ✅ Docker Compose setup (app + MySQL + Prometheus + Grafana)
-- ✅ CI pipeline with GitHub Actions (runs tests against MySQL)
+- ✅ Docker Compose setup for local development
+- ✅ CI pipeline with GitHub Actions
+- ✅ Integration tests against MySQL
+- ✅ Structured logging for debugging and operational visibility
 
 ---
 
