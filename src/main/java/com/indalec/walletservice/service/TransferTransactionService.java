@@ -43,23 +43,39 @@ public class TransferTransactionService {
             String idempotencyKey
     ) {
 
-        Wallet source = walletRepository.findByIdForUpdate(sourceWalletId)
-                .orElseThrow(() -> {
-                    log.warn("Transfer failed: source wallet not found. walletId={}", sourceWalletId);
-                    return new WalletNotFoundException("Wallet not found");
-                });
-
-        Wallet destination = walletRepository.findByIdForUpdate(destinationWalletId)
-                .orElseThrow(() -> {
-                    log.warn("Transfer failed: destination wallet not found. walletId={}", destinationWalletId);
-                    return new WalletNotFoundException("Wallet not found");
-                });
-
         if (sourceWalletId.equals(destinationWalletId)) {
             log.warn("Transfer failed: source and destination wallets are the same. walletId={}",
                     sourceWalletId);
             throw new TransferException("A wallet cannot transfer money to itself");
         }
+
+        UUID firstId = sourceWalletId.compareTo(destinationWalletId) < 0
+                ? sourceWalletId
+                : destinationWalletId;
+
+        UUID secondId = sourceWalletId.compareTo(destinationWalletId) < 0
+                ? destinationWalletId
+                : sourceWalletId;
+
+        Wallet firstWallet = walletRepository.findByIdForUpdate(firstId)
+                .orElseThrow(() -> {
+                    log.warn("Transfer failed: wallet not found. walletId={}", firstId);
+                    return new WalletNotFoundException("Wallet not found");
+                });
+
+        Wallet secondWallet = walletRepository.findByIdForUpdate(secondId)
+                .orElseThrow(() -> {
+                    log.warn("Transfer failed: wallet not found. walletId={}", secondId);
+                    return new WalletNotFoundException("Wallet not found");
+                });
+
+        Wallet source = sourceWalletId.equals(firstId)
+                ? firstWallet
+                : secondWallet;
+
+        Wallet destination = destinationWalletId.equals(firstId)
+                ? firstWallet
+                : secondWallet;
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             log.warn("Transfer failed: amount must be greater than zero. sourceWalletId={}, destinationWalletId={}",

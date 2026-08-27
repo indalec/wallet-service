@@ -10,10 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -266,6 +263,76 @@ class TransferIntegrationTest {
         assertEquals(
                 2,
                 successfulRequests
+        );
+    }
+
+    @Test
+    void shouldHandleConcurrentTransfersInOppositeDirections()
+            throws InterruptedException, ExecutionException {
+
+        Wallet walletA = walletRepository.save(
+                new Wallet("Alice", "EUR", new BigDecimal("100.00"))
+        );
+
+        Wallet walletB = walletRepository.save(
+                new Wallet("Bob", "EUR", new BigDecimal("100.00"))
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Callable<Boolean> transferAtoB = () -> {
+            try {
+                transferService.transfer(
+                        walletA.getId(),
+                        walletB.getId(),
+                        new BigDecimal("25.00"),
+                        "EUR",
+                        "opposite-transfer-a"
+                );
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        };
+
+        Callable<Boolean> transferBtoA = () -> {
+            try {
+                transferService.transfer(
+                        walletB.getId(),
+                        walletA.getId(),
+                        new BigDecimal("10.00"),
+                        "EUR",
+                        "opposite-transfer-b"
+                );
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        };
+
+        List<Future<Boolean>> results = executor.invokeAll(
+                List.of(transferAtoB, transferBtoA)
+        );
+
+        executor.shutdown();
+
+        assertTrue(results.get(0).get());
+        assertTrue(results.get(1).get());
+
+        Wallet finalA =
+                walletRepository.findById(walletA.getId()).orElseThrow();
+
+        Wallet finalB =
+                walletRepository.findById(walletB.getId()).orElseThrow();
+
+        assertEquals(
+                new BigDecimal("85.00"),
+                finalA.getBalance()
+        );
+
+        assertEquals(
+                new BigDecimal("115.00"),
+                finalB.getBalance()
         );
     }
 }
