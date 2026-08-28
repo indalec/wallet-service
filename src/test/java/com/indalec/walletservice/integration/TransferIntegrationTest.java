@@ -26,6 +26,7 @@ class TransferIntegrationTest {
     @Autowired
     private TransferService transferService;
 
+    //Money correctly updates and saves both wallet balances
     @Test
     void shouldTransferMoneyAndPersistNewBalances() {
 
@@ -62,6 +63,7 @@ class TransferIntegrationTest {
         );
     }
 
+    // Tests that concurrent transfers cannot spend more money from the source wallet than it actually contains.
     @Test
     void shouldNotAllowTwoConcurrentTransfersToOverspendWallet()
             throws InterruptedException {
@@ -136,6 +138,7 @@ class TransferIntegrationTest {
         );
     }
 
+    //(one transfer after the other)
     @Test
     void shouldNotTransferMoneyTwiceWithSameIdempotencyKey() {
 
@@ -182,6 +185,7 @@ class TransferIntegrationTest {
         );
     }
 
+    //transfers at the same time in separated threads
     @Test
     void shouldExecuteConcurrentRequestsWithSameIdempotencyKeyOnlyOnce()
             throws InterruptedException {
@@ -265,7 +269,7 @@ class TransferIntegrationTest {
                 successfulRequests
         );
     }
-
+    //operations in opposite directions at the same time won't mismatch the wallets
     @Test
     void shouldHandleConcurrentTransfersInOppositeDirections()
             throws InterruptedException, ExecutionException {
